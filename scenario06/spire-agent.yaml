@@ -51,13 +51,13 @@ data:
     agent {
       data_dir = "/run/spire"
       log_level = "DEBUG"
-      server_address = "192.168.99.116"
-      server_port = "30097"
+      server_address = ""
+      server_port = ""
       socket_path = "/run/spire/sockets/agent.sock"
       # trust_bundle_path = "/run/spire/bundle/bundle.crt"
       trust_domain = "example.org"
       insecure_bootstrap = true
-      join_token = "c5bf0cda-7380-4756-830a-386ee51e7bff"
+      join_token = "ea6a6750-3ce3-4fbd-8337-84e4358f9c51"
     }
 
     plugins {

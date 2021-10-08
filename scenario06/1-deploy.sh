@@ -21,7 +21,7 @@ main() {
   local -r dirname="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
   local -r filename="${dirname}/$(basename "${BASH_SOURCE[0]}")"
   
-  "${dirname}"/2-cleanup.sh > /dev/null
+  "${dirname}"/2-cleanup.sh 2> /dev/null
   
   pause_echo "# Deploy spire-server and cilium cluster2"
 
@@ -62,6 +62,13 @@ main() {
     -selector k8s:pod-label:app:spire-server \
     -selector unix:uid:0 \
     -admin
+
+  container_id_cluster1=$(docker container ls | grep cluster1 | cut -d" " -f 1)
+  container_id_cluster2=$(docker container ls | grep cluster2 | cut -d" " -f 1)
+
+  # Connect bridges
+  docker network connect cluster2 "${container_id_cluster1}"
+  docker network connect cluster1 "${container_id_cluster2}"
 
   pause_echo "# Deploy CRD, spire-agent, registrar cluster1"
   kubectx cluster1
