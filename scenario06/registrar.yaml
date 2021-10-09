@@ -58,59 +58,59 @@ metadata:
 
 ---
 
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: spire-server
-  namespace: spire
-data:
-  server.conf: |
-    server {
-      bind_address = "0.0.0.0"
-      bind_port = "8081"
-      trust_domain = "example.org"
-      data_dir = "/run/spire/data"
-      log_level = "DEBUG"
-      default_svid_ttl = "1h"
-      ca_subject = {
-        country = ["US"],
-        organization = ["SPIFFE"],
-        common_name = "",
-      }
-    }
+# apiVersion: v1
+# kind: ConfigMap
+# metadata:
+#   name: spire-server
+#   namespace: spire
+# data:
+#   server.conf: |
+#     server {
+#       bind_address = "0.0.0.0"
+#       bind_port = "8081"
+#       trust_domain = "example.org"
+#       data_dir = "/run/spire/data"
+#       log_level = "DEBUG"
+#       default_svid_ttl = "1h"
+#       ca_subject = {
+#         country = ["US"],
+#         organization = ["SPIFFE"],
+#         common_name = "",
+#       }
+#     }
 
-    plugins {
-      DataStore "sql" {
-        plugin_data {
-          database_type = "sqlite3"
-          connection_string = "/run/spire/data/datastore.sqlite3"
-        }
-      }
+#     plugins {
+#       DataStore "sql" {
+#         plugin_data {
+#           database_type = "sqlite3"
+#           connection_string = "/run/spire/data/datastore.sqlite3"
+#         }
+#       }
 
-      NodeAttestor "k8s_psat" {
-        plugin_data {
-          clusters = {
-            "demo-cluster" = {
-              service_account_allow_list = ["spire:spire-agent"]
-            }
-          }
-        }
-      }
+#       NodeAttestor "k8s_psat" {
+#         plugin_data {
+#           clusters = {
+#             "demo-cluster" = {
+#               service_account_allow_list = ["spire:spire-agent"]
+#             }
+#           }
+#         }
+#       }
 
-      KeyManager "disk" {
-        plugin_data {
-          keys_path = "/run/spire/data/keys.json"
-        }
-      }
+#       KeyManager "disk" {
+#         plugin_data {
+#           keys_path = "/run/spire/data/keys.json"
+#         }
+#       }
 
-      Notifier "k8sbundle" {
-        plugin_data {
-          webhook_label = "spiffe.io/webhook"
-        }
-      }
-    }
+#       Notifier "k8sbundle" {
+#         plugin_data {
+#           webhook_label = "spiffe.io/webhook"
+#         }
+#       }
+#     }
 
----
+# ---
 
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -153,7 +153,7 @@ data:
   k8s-workload-registrar.conf: |
     log_level = "trace"
     trust_domain = "example.org"
-    server_address = "192.168.58.2:30478"
+    server_address = "192.168.58.2:31806"
     agent_socket_path = "/run/spire/sockets/agent.sock"
     cluster = "demo-cluster"
     pod_controller = true
@@ -272,19 +272,19 @@ spec:
   selector:
     app: spire-server
 
----
-# server persistent volume
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: my-pv-vol
-  labels:
-    type: local
-spec:
-  storageClassName: ""
-  capacity:
-    storage: 4Gi
-  accessModes:
-    - ReadWriteOnce
-  hostPath:
-    path: "/run"
+# ---
+# # server persistent volume
+# apiVersion: v1
+# kind: PersistentVolume
+# metadata:
+#   name: my-pv-vol
+#   labels:
+#     type: local
+# spec:
+#   storageClassName: ""
+#   capacity:
+#     storage: 4Gi
+#   accessModes:
+#     - ReadWriteOnce
+#   hostPath:
+#     path: "/run"

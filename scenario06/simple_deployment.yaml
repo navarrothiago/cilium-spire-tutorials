@@ -11,6 +11,7 @@ spec:
     metadata:
       labels:
         app: nginx
+        spiffe.io/spiffe-id: "true"
     spec:
       containers:
       - name: nginx

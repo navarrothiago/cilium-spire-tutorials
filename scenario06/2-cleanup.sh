@@ -20,6 +20,13 @@ main() {
   kubectl delete -f spire-server.yaml
   kubectl delete -f "${dirname}"/../cilium.yaml
 
+  container_id_cluster1=$(docker container ls | grep cluster1 | cut -d" " -f 1)
+  container_id_cluster2=$(docker container ls | grep cluster2 | cut -d" " -f 1)
+
+  # Disconnect bridges
+  docker network disconnect cluster2 "${container_id_cluster1}"
+  docker network disconnect cluster1 "${container_id_cluster2}"
+
   exit 0
 }
 main "$@"

@@ -13,7 +13,7 @@
 function pause_echo {
 
 echo $@
-sleep 3
+# sleep 3
 
 }
 
@@ -30,7 +30,7 @@ main() {
   kubectl apply -f "${dirname}/../"cilium.yaml
   kubectl apply -f spire-server.yaml
   kubectl get pods -A
-  while [[ $(kubectl -n spire get pods spire-server-0 -o 'jsonpath={..status.conditions[?(@.type=="Ready")].status}') != "True" ]]; do echo "waiting for pod" && sleep 1 && kubectl get pods -A; done
+  while [[ $(kubectl -n spire get pods spire-server-0 -o 'jsonpath={..status.conditions[?(@.type=="Ready")].status}') != "True" ]]; do echo "waiting for pod" && sleep 4 && kubectl get pods -A; done
 
   pause_echo "# Change spire-agent server_address and server_port based on the spire-server-0"
   current_server_ip=$(grep "server_address = " spire-agent.yaml  | awk -F\" '{print $2}')
@@ -56,12 +56,31 @@ main() {
   echo "${desired_token}"
   sed -i 's@'"${current_token}"'@'"${desired_token}"'@' spire-agent.yaml 
 
-  pause_echo "# Add privileged registration entry for the registrar"
+  # pause_echo "# Add privileged registration entry for the registrar"
+  # kubectl exec -n spire spire-server-0 -- \
+  #   /opt/spire/bin/spire-server entry create \
+  #   -spiffeID spiffe://example.org/registrar \
+  #   -parentID spiffe://example.org/spire/agent/join_token/"${desired_token}" \
+  #   -selector k8s:pod-label:app:spire-server \
+  #   -selector unix:uid:0 \
+  #   -admin
+
+  # Registrar connects via unix socket to fetch the SVIDs through spire-agent
+  # Registrar uses the SVIDs to establish a secure connection to spire-server
   kubectl exec -n spire spire-server-0 -- \
     /opt/spire/bin/spire-server entry create \
     -spiffeID spiffe://example.org/registrar \
-    -parentID spiffe://example.org/spire/agent/join_token/"${desired_token}" \
+    -parentID spiffe://example.org/spire-agent \
     -selector k8s:pod-label:app:spire-server \
+    -selector unix:uid:0 \
+    -admin
+
+ # TODO check admin flag. If remove, boomm! error:
+ # unable to make Mint SVID Request: rpc error: code = PermissionDenied desc = authorization denied for method /spire.api.server.svid.v1.SVID/MintX509SVID
+  kubectl exec -n spire spire-server-0 -- \
+    /opt/spire/bin/spire-server entry create \
+    -spiffeID spiffe://example.org/ciliumagent \
+    -parentID spiffe://example.org/spire-agent \
     -selector unix:uid:0 \
     -admin
 
@@ -72,19 +91,13 @@ main() {
   docker network connect cluster2 "${container_id_cluster1}"
   docker network connect cluster1 "${container_id_cluster2}"
   
-  kubectl exec -n spire spire-server-0 -- \
-    /opt/spire/bin/spire-server entry create \
-    -spiffeID spiffe://example.org/ciliumagent \
-    -parentID spiffe://example.org/spire/agent/join_token/"${desired_token}" \
-    -selector unix:uid:0
-
   pause_echo "# Deploy cilium, CRD, spire-agent, registrar to cluster1"
   kubectx cluster1
   kubectl apply -f "${dirname}/../"cilium.yaml
   kubectl apply -f spiffeid.spiffe.io_spiffeids.yaml
   kubectl apply -f spire-agent.yaml
   kubectl apply -f registrar.yaml
-  while [[ $(kubectl -n spire get pods spire-server-0 -o 'jsonpath={..status.conditions[?(@.type=="Ready")].status}') != "True" ]]; do echo "waiting for pod" && sleep 1 && kubectl get pods -A; done
+  while [[ $(kubectl -n spire get pods spire-server-0 -o 'jsonpath={..status.conditions[?(@.type=="Ready")].status}') != "True" ]]; do echo "waiting for pod" && sleep 4 && kubectl get pods -A; done
 
   pause_echo "# Deploy nginx workload to cluster1"
   kubectl apply -f https://raw.githubusercontent.com/kubernetes/website/master/content/en/examples/application/simple_deployment.yaml
