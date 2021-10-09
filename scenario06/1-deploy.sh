@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Brief: Deploy registrar and spire on separate node
+# Brief: Deploy cilium, registrar, spire and workload to separated clusters.
 
 # Details
 # Deploy spire-server cluster2
@@ -8,6 +8,7 @@
 # Change registrar server_address and server port based on the spire-server-0 
 # Generate token and update spire-agent manifest
 # Deploy CRD, spire-agent, registrar cluster1
+# Deploy nginx
 
 function pause_echo {
 
@@ -23,14 +24,15 @@ main() {
   
   "${dirname}"/2-cleanup.sh 2> /dev/null
   
-  pause_echo "# Deploy spire-server and cilium cluster2"
+  pause_echo "# Deploy spire-server and cilium to cluster2"
 
   kubectx cluster2
+  kubectl apply -f "${dirname}/../"cilium.yaml
   kubectl apply -f spire-server.yaml
   kubectl get pods -A
   while [[ $(kubectl -n spire get pods spire-server-0 -o 'jsonpath={..status.conditions[?(@.type=="Ready")].status}') != "True" ]]; do echo "waiting for pod" && sleep 1 && kubectl get pods -A; done
 
-  pause_echo "# Change spire-agent server_address and server port based on the spire-server-0"
+  pause_echo "# Change spire-agent server_address and server_port based on the spire-server-0"
   current_server_ip=$(grep "server_address = " spire-agent.yaml  | awk -F\" '{print $2}')
   desired_server_ip=$(minikube service --url spire-server -p cluster2 -n spire | cut -d':' -f 2 | cut -b 3-)
   sed -i 's@'"${current_server_ip}"'@'"${desired_server_ip}"'@' spire-agent.yaml 
@@ -38,7 +40,7 @@ main() {
   desired_server_port=$(minikube service --url spire-server -p cluster2 -n spire | cut -d':' -f 3)
   sed -i 's@'"${current_server_port}"'@'"${desired_server_port}"'@' spire-agent.yaml 
 
-  pause_echo "# Change registrar server_address and server port based on the spire-server-0"
+  pause_echo "# Change registrar server_address based on the spire-server-0"
   current_full_server_address=$(grep "server_address = " registrar.yaml  | awk -F\" '{print $2}')
   desired_full_server_address="${desired_server_ip}":"${desired_server_port}"
   sed -i 's@'"${current_full_server_address}"'@'"${desired_full_server_address}"'@' registrar.yaml
@@ -69,14 +71,22 @@ main() {
   # Connect bridges
   docker network connect cluster2 "${container_id_cluster1}"
   docker network connect cluster1 "${container_id_cluster2}"
+  
+  kubectl exec -n spire spire-server-0 -- \
+    /opt/spire/bin/spire-server entry create \
+    -spiffeID spiffe://example.org/ciliumagent \
+    -parentID spiffe://example.org/spire/agent/join_token/"${desired_token}" \
+    -selector unix:uid:0
 
-  pause_echo "# Deploy CRD, spire-agent, registrar cluster1"
+  pause_echo "# Deploy cilium, CRD, spire-agent, registrar to cluster1"
   kubectx cluster1
+  kubectl apply -f "${dirname}/../"cilium.yaml
   kubectl apply -f spiffeid.spiffe.io_spiffeids.yaml
   kubectl apply -f spire-agent.yaml
   kubectl apply -f registrar.yaml
   while [[ $(kubectl -n spire get pods spire-server-0 -o 'jsonpath={..status.conditions[?(@.type=="Ready")].status}') != "True" ]]; do echo "waiting for pod" && sleep 1 && kubectl get pods -A; done
 
+  pause_echo "# Deploy nginx workload to cluster1"
   kubectl apply -f https://raw.githubusercontent.com/kubernetes/website/master/content/en/examples/application/simple_deployment.yaml
   kubectl patch deployment nginx-deployment -p '{"spec":{"template":{"metadata":{"labels":{"spiffe.io/spiffe-id": "true"}}}}}'
 
