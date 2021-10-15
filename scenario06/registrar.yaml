@@ -99,7 +99,7 @@ data:
   k8s-workload-registrar.conf: |
     log_level = "trace"
     trust_domain = "example.org"
-    server_address = "192.168.58.2:32184"
+    server_address = "192.168.58.2:30938"
     agent_socket_path = "/run/spire/sockets/agent.sock"
     cluster = "demo-cluster"
     pod_controller = true

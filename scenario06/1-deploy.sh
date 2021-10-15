@@ -70,11 +70,11 @@ main() {
     -selector unix:uid:0 \
     -admin
 
-#  kubectl exec -n spire spire-server-0 -- \
-#     /opt/spire/bin/spire-server entry create \
-#     -spiffeID spiffe://example.org/ciliumagent \
-#     -parentID spiffe://example.org/spire/agent/demo_cluster/"${node_uid}" \
-#     -selector unix:uid:0 
+ kubectl exec -n spire spire-server-0 -- \
+    /opt/spire/bin/spire-server entry create \
+    -spiffeID spiffe://example.org/ciliumagent \
+    -parentID spiffe://example.org/spire/agent/k8s_psat/demo-cluster/"${node_uid}" \
+    -selector unix:uid:0 
 
  # TODO check admin flag. If remove, boomm! error:
  # unable to make Mint SVID Request: rpc error: code = PermissionDenied desc = authorization denied for method /spire.api.server.svid.v1.SVID/MintX509SVID
