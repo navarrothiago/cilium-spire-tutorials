@@ -1,0 +1,51 @@
+[navarro@vostok] /work/accuknox/cilium-spire-tutorials/scenario06 (registrar) $ kubectl exec spire-server-0 -n spire -c spire-server --context cluster2 -- ./bin/spire-server entry show 
+Found 6 entries
+Entry ID         : ac288973-fde6-4fe3-8544-464194dced58
+SPIFFE ID        : spiffe://example.org/ciliumagent
+Parent ID        : spiffe://example.org/k8s-workload-registrar/demo-cluster/node/cluster1
+Revision         : 0
+TTL              : default
+Selector         : unix:uid:0
+Admin            : true
+
+Entry ID         : 3f76a9c7-2e86-4700-bbc2-fd279d72f434
+SPIFFE ID        : spiffe://example.org/ciliumagent
+Parent ID        : spiffe://example.org/spire/agent/k8s_psat/demo-cluster/7cf6be90-6bb0-40ec-bd08-4cb8b07477a1
+Revision         : 0
+TTL              : default
+Selector         : unix:uid:0
+
+Entry ID         : ebd24b35-745b-4d5d-ba0d-3b88666a469f
+SPIFFE ID        : spiffe://example.org/k8s-workload-registrar/demo-cluster/node/cluster1
+Parent ID        : spiffe://example.org/spire/server
+Revision         : 0
+TTL              : default
+Selector         : k8s_psat:agent_node_uid:7cf6be90-6bb0-40ec-bd08-4cb8b07477a1
+Selector         : k8s_psat:cluster:demo-cluster
+
+Entry ID         : 82a64b52-a3d1-44d1-9975-c255a0e6b099
+SPIFFE ID        : spiffe://example.org/ns/default/pod/nginx-deployment-7ffbd8bd54-qdcpv
+Parent ID        : spiffe://example.org/k8s-workload-registrar/demo-cluster/node/cluster1
+Revision         : 0
+TTL              : default
+Selector         : k8s:node-name:cluster1
+Selector         : k8s:ns:default
+Selector         : k8s:pod-uid:df938d86-a702-471a-a8f2-aa5e17dbd537
+DNS name         : nginx-deployment-7ffbd8bd54-qdcpv
+
+Entry ID         : b46f88dd-c7ed-460a-bcbd-834437a6bc13
+SPIFFE ID        : spiffe://example.org/registrar
+Parent ID        : spiffe://example.org/spire/agent/join_token/bb59efc4-6da5-4d06-9d9d-aa40354c3e63
+Revision         : 0
+TTL              : default
+Selector         : k8s:pod-label:app:spire-server
+Selector         : unix:uid:0
+Admin            : true
+
+Entry ID         : 0044cb67-fc42-43ca-812d-a5771a55b42c
+SPIFFE ID        : spiffe://example.org/spire-agent
+Parent ID        : spiffe://example.org/spire/agent/join_token/bb59efc4-6da5-4d06-9d9d-aa40354c3e63
+Revision         : 0
+TTL              : default
+Selector         : spiffe_id:spiffe://example.org/spire/agent/join_token/bb59efc4-6da5-4d06-9d9d-aa40354c3e63
+

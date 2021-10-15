@@ -58,14 +58,23 @@ main() {
   # pause_echo "# Add privileged registration entry for the registrar"
   # Registrar connects via unix socket to fetch the SVIDs through spire-agent
   # Registrar uses the SVIDs to establish a secure connection to spire-server
+    # -parentID spiffe://example.org/k8s-workload-registrar/demo-cluster/node/cluster1 \
     # -parentID spiffe://example.org/spire/agent/join_token/"${desired_token}" \
+    # -parentID spiffe://example.org/spire/agent/demo_cluster/"${node_uid}" \
+  node_uid=$(kubectl get nodes -o json --context cluster1 | jq .items[0].metadata.uid | awk -F\" '{print $2}')
   kubectl exec -n spire spire-server-0 -- \
     /opt/spire/bin/spire-server entry create \
     -spiffeID spiffe://example.org/registrar \
-    -parentID spiffe://example.org/k8s-workload-registrar/demo-cluster/node/cluster1 \
+    -parentID spiffe://example.org/spire/agent/join_token/"${desired_token}" \
     -selector k8s:pod-label:app:spire-server \
     -selector unix:uid:0 \
     -admin
+
+#  kubectl exec -n spire spire-server-0 -- \
+#     /opt/spire/bin/spire-server entry create \
+#     -spiffeID spiffe://example.org/ciliumagent \
+#     -parentID spiffe://example.org/spire/agent/demo_cluster/"${node_uid}" \
+#     -selector unix:uid:0 
 
  # TODO check admin flag. If remove, boomm! error:
  # unable to make Mint SVID Request: rpc error: code = PermissionDenied desc = authorization denied for method /spire.api.server.svid.v1.SVID/MintX509SVID
