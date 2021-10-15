@@ -1,3 +1,5 @@
+# Based on https://raw.githubusercontent.com/spiffe/spire/main/support/k8s/k8s-workload-registrar/mode-crd/config/spire-agent.yaml
+
 apiVersion: v1
 kind: Namespace
 metadata:
@@ -52,11 +54,11 @@ data:
       data_dir = "/run/spire"
       log_level = "DEBUG"
       server_address = "192.168.58.2"
-      server_port = "31806"
+      server_port = "30477"
       socket_path = "/run/spire/sockets/agent.sock"
       trust_domain = "example.org"
       insecure_bootstrap = true
-      join_token = "6f84331c-cb6a-4a53-830f-b269458035a9"
+      #join_token = "500378f5-0e08-4fed-a394-9260cc997b19"
       admin_socket_path = "/run/spire/sockets-admin/admin.sock"
       authorized_users_delegation_api = [
           "spiffe://example.org/ciliumagent",
@@ -64,8 +66,14 @@ data:
     }
 
     plugins {
-      NodeAttestor "join_token" {
+      # NodeAttestor "join_token" {
+      #   plugin_data {
+      #   }
+      # }
+
+      NodeAttestor "k8s_psat" {
         plugin_data {
+          cluster = "demo-cluster"
         }
       }
 

@@ -27,17 +27,16 @@ main() {
   pause_echo "# Deploy spire-server and cilium to cluster2"
 
   kubectx cluster2
-  kubectl apply -f "${dirname}/../"cilium.yaml
   kubectl apply -f spire-server.yaml
   kubectl get pods -A
   while [[ $(kubectl -n spire get pods spire-server-0 -o 'jsonpath={..status.conditions[?(@.type=="Ready")].status}') != "True" ]]; do echo "waiting for pod" && sleep 4 && kubectl get pods -A; done
 
   pause_echo "# Change spire-agent server_address and server_port based on the spire-server-0"
   current_server_ip=$(grep "server_address = " spire-agent.yaml  | awk -F\" '{print $2}')
-  desired_server_ip=$(minikube service --url spire-server -p cluster2 -n spire | cut -d':' -f 2 | cut -b 3-)
+  desired_server_ip=$(minikube service --url spire-server -p cluster2 -n spire --https | cut -d':' -f 2 | cut -b 3-)
   sed -i 's@'"${current_server_ip}"'@'"${desired_server_ip}"'@' spire-agent.yaml 
   current_server_port=$(grep "server_port = " spire-agent.yaml  | awk -F\" '{print $2}')
-  desired_server_port=$(minikube service --url spire-server -p cluster2 -n spire | cut -d':' -f 3)
+  desired_server_port=$(minikube service --url spire-server -p cluster2 -n spire --https | cut -d':' -f 3)
   sed -i 's@'"${current_server_port}"'@'"${desired_server_port}"'@' spire-agent.yaml 
 
   pause_echo "# Change registrar server_address based on the spire-server-0"
@@ -57,30 +56,24 @@ main() {
   sed -i 's@'"${current_token}"'@'"${desired_token}"'@' spire-agent.yaml 
 
   # pause_echo "# Add privileged registration entry for the registrar"
-  # kubectl exec -n spire spire-server-0 -- \
-  #   /opt/spire/bin/spire-server entry create \
-  #   -spiffeID spiffe://example.org/registrar \
-  #   -parentID spiffe://example.org/spire/agent/join_token/"${desired_token}" \
-  #   -selector k8s:pod-label:app:spire-server \
-  #   -selector unix:uid:0 \
-  #   -admin
-
   # Registrar connects via unix socket to fetch the SVIDs through spire-agent
   # Registrar uses the SVIDs to establish a secure connection to spire-server
+    # -parentID spiffe://example.org/spire/agent/join_token/"${desired_token}" \
   kubectl exec -n spire spire-server-0 -- \
     /opt/spire/bin/spire-server entry create \
     -spiffeID spiffe://example.org/registrar \
-    -parentID spiffe://example.org/spire-agent \
+    -parentID spiffe://example.org/k8s-workload-registrar/demo-cluster/node/cluster1 \
     -selector k8s:pod-label:app:spire-server \
     -selector unix:uid:0 \
     -admin
 
  # TODO check admin flag. If remove, boomm! error:
  # unable to make Mint SVID Request: rpc error: code = PermissionDenied desc = authorization denied for method /spire.api.server.svid.v1.SVID/MintX509SVID
+    # -parentID spiffe://example.org/spire/agent/join_token/"${desired_token}" \
   kubectl exec -n spire spire-server-0 -- \
     /opt/spire/bin/spire-server entry create \
     -spiffeID spiffe://example.org/ciliumagent \
-    -parentID spiffe://example.org/spire-agent \
+    -parentID spiffe://example.org/k8s-workload-registrar/demo-cluster/node/cluster1 \
     -selector unix:uid:0 \
     -admin
 
