@@ -94,7 +94,7 @@ data:
             "demo-cluster" = {
               service_account_allow_list = ["spire:spire-agent"]
               kube_config_file = "/tmp/kube/kube.conf"
-              use_token_review_api_validation = true
+              # use_token_review_api_validation = true
             }
           }
         }

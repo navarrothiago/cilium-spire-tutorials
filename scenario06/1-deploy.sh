@@ -46,26 +46,14 @@ main() {
   echo $current_full_server_address
   echo $desired_full_server_address
 
-  pause_echo "# Generate token and update spire-agent manifest"
-  current_token=$(grep "join_token = " spire-agent.yaml  | awk -F\" '{print $2}')
-  echo "########## CURRENT TOKEN ########## "
-  echo "${current_token}"
-  desired_token=$(kubectl exec -n spire pod/spire-server-0 -- ./bin/spire-server token generate -spiffeID spiffe://example.org/spire-agent | grep Token | cut -d' ' -f2)
-  echo "########## DESIRED TOKEN ##########"
-  echo "${desired_token}"
-  sed -i 's@'"${current_token}"'@'"${desired_token}"'@' spire-agent.yaml 
-
   # pause_echo "# Add privileged registration entry for the registrar"
   # Registrar connects via unix socket to fetch the SVIDs through spire-agent
   # Registrar uses the SVIDs to establish a secure connection to spire-server
-    # -parentID spiffe://example.org/k8s-workload-registrar/demo-cluster/node/cluster1 \
-    # -parentID spiffe://example.org/spire/agent/join_token/"${desired_token}" \
-    # -parentID spiffe://example.org/spire/agent/demo_cluster/"${node_uid}" \
   node_uid=$(kubectl get nodes -o json --context cluster1 | jq .items[0].metadata.uid | awk -F\" '{print $2}')
   kubectl exec -n spire spire-server-0 -- \
     /opt/spire/bin/spire-server entry create \
     -spiffeID spiffe://example.org/registrar \
-    -parentID spiffe://example.org/spire/agent/join_token/"${desired_token}" \
+    -parentID spiffe://example.org/spire/agent/k8s_psat/demo-cluster/"${node_uid}" \
     -selector k8s:pod-label:app:spire-server \
     -selector unix:uid:0 \
     -admin
@@ -76,18 +64,14 @@ main() {
     -parentID spiffe://example.org/spire/agent/k8s_psat/demo-cluster/"${node_uid}" \
     -selector unix:uid:0 
 
- # TODO check admin flag. If remove, boomm! error:
- # unable to make Mint SVID Request: rpc error: code = PermissionDenied desc = authorization denied for method /spire.api.server.svid.v1.SVID/MintX509SVID
-    # -parentID spiffe://example.org/spire/agent/join_token/"${desired_token}" \
-  kubectl exec -n spire spire-server-0 -- \
-    /opt/spire/bin/spire-server entry create \
-    -spiffeID spiffe://example.org/ciliumagent \
-    -parentID spiffe://example.org/k8s-workload-registrar/demo-cluster/node/cluster1 \
-    -selector unix:uid:0 \
-    -admin
-
   container_id_cluster1=$(docker container ls | grep cluster1 | cut -d" " -f 1)
   container_id_cluster2=$(docker container ls | grep cluster2 | cut -d" " -f 1)
+
+  # FIXME navarrothiago: THERE IS AN INTERMITTENT PROBLEM IF WE NOT WAIT. 
+  # THE spiffe://example.org/k8s-workload-registrar/demo-cluster/node/cluster1 IS NOT CREATED.
+  # Depending on the sleep is placed, the behaviour change. Try to remove it. 
+  # I dont know if the sleep is necessary.
+  sleep 3
 
   # Connect bridges
   docker network connect cluster2 "${container_id_cluster1}"
@@ -103,7 +87,6 @@ main() {
 
   pause_echo "# Deploy nginx workload to cluster1"
   kubectl apply -f https://raw.githubusercontent.com/kubernetes/website/master/content/en/examples/application/simple_deployment.yaml
-  kubectl patch deployment nginx-deployment -p '{"spec":{"template":{"metadata":{"labels":{"spiffe.io/spiffe-id": "true"}}}}}'
 
   exit 0
 }
