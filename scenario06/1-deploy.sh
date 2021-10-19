@@ -58,8 +58,6 @@ main() {
     -selector unix:uid:0 \
     -admin
 
-  # sleep 10
-
  kubectl exec -n spire spire-server-0 -- \
     /opt/spire/bin/spire-server entry create \
     -spiffeID spiffe://example.org/ciliumagent \
@@ -73,7 +71,6 @@ main() {
   # THE spiffe://example.org/k8s-workload-registrar/demo-cluster/node/cluster1 IS NOT CREATED.
   # Depending on the sleep is placed, the behaviour change. Try to remove it. 
   # I dont know if the sleep is necessary.
-  # sleep 10
 
   # Connect bridges
   docker network connect cluster2 "${container_id_cluster1}"
