@@ -99,11 +99,9 @@ main() {
   kubectx cluster1
   kubectl apply -f "${dirname}/../"cilium.yaml
   kubectl apply -f spire-agent.yaml
+  kubectl apply -f simple_deployment.yaml
   while [[ $(kubectl -n spire get pods spire-server-0 -o 'jsonpath={..status.conditions[?(@.type=="Ready")].status}') != "True" ]]; do echo "waiting for pod" && sleep 4 && kubectl get pods -A; done
 
-  pause_echo "# Deploy nginx workload to cluster1"
-  kubectl apply -f https://raw.githubusercontent.com/kubernetes/website/master/content/en/examples/application/simple_deployment.yaml
-  kubectl patch deployment nginx-deployment -p '{"spec":{"template":{"metadata":{"labels":{"spiffe.io/spiffe-id": "true"}}}}}'
 
   exit 0
 }

@@ -1,0 +1,7 @@
+kubectl exec -n spire spire-server-0 --context cluster2 -- \
+  /opt/spire/bin/spire-server entry create \
+  -spiffeID spiffe://example.org/registrar \
+  -parentID spiffe://example.org/spire/agent/k8s_psat/demo-cluster/a7bcea5e-5811-476d-9bf2-cb20f952a194 \
+  -selector k8s:pod-label:app:spire-server \
+  -selector unix:uid:0 \
+  -admin

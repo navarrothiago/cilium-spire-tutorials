@@ -58,6 +58,8 @@ main() {
     -selector unix:uid:0 \
     -admin
 
+  # sleep 10
+
  kubectl exec -n spire spire-server-0 -- \
     /opt/spire/bin/spire-server entry create \
     -spiffeID spiffe://example.org/ciliumagent \
@@ -71,7 +73,7 @@ main() {
   # THE spiffe://example.org/k8s-workload-registrar/demo-cluster/node/cluster1 IS NOT CREATED.
   # Depending on the sleep is placed, the behaviour change. Try to remove it. 
   # I dont know if the sleep is necessary.
-  sleep 3
+  # sleep 10
 
   # Connect bridges
   docker network connect cluster2 "${container_id_cluster1}"
@@ -85,8 +87,8 @@ main() {
   kubectl apply -f registrar.yaml
   while [[ $(kubectl -n spire get pods spire-server-0 -o 'jsonpath={..status.conditions[?(@.type=="Ready")].status}') != "True" ]]; do echo "waiting for pod" && sleep 4 && kubectl get pods -A; done
 
-  pause_echo "# Deploy nginx workload to cluster1"
-  kubectl apply -f https://raw.githubusercontent.com/kubernetes/website/master/content/en/examples/application/simple_deployment.yaml
+  # pause_echo "# Deploy nginx workload to cluster1"
+  kubectl apply -f simple_deployment.yaml
 
   exit 0
 }

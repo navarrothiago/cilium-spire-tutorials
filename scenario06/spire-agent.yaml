@@ -54,7 +54,7 @@ data:
       data_dir = "/run/spire"
       log_level = "DEBUG"
       server_address = "192.168.58.2"
-      server_port = "30203"
+      server_port = "30145"
       socket_path = "/run/spire/sockets/agent.sock"
       trust_domain = "example.org"
       insecure_bootstrap = true

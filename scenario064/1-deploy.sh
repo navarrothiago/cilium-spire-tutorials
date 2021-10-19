@@ -46,25 +46,18 @@ main() {
   echo $current_full_server_address
   echo $desired_full_server_address
 
-  pause_echo "# Generate token and update spire-agent manifest"
-  current_token=$(grep "join_token = " spire-agent.yaml  | awk -F\" '{print $2}')
-  echo "########## CURRENT TOKEN ########## "
-  echo "${current_token}"
-  desired_token=$(kubectl exec -n spire pod/spire-server-0 -- ./bin/spire-server token generate -spiffeID spiffe://example.org/spire-agent | grep Token | cut -d' ' -f2)
-  echo "########## DESIRED TOKEN ##########"
-  echo "${desired_token}"
-  sed -i 's@'"${current_token}"'@'"${desired_token}"'@' spire-agent.yaml 
-
-  # pause_echo "# Add privileged registration entry for the registrar"
+  # sleep 1
+  node_uid=$(kubectl get nodes -o json --context cluster1 | jq .items[0].metadata.uid | awk -F\" '{print $2}')
   # Registrar connects via unix socket to fetch the SVIDs through spire-agent
   # Registrar uses the SVIDs to establish a secure connection to spire-server
   kubectl exec -n spire spire-server-0 -- \
     /opt/spire/bin/spire-server entry create \
     -spiffeID spiffe://example.org/registrar \
-    -parentID spiffe://example.org/spire/agent/join_token/"${desired_token}" \
+    -parentID spiffe://example.org/spire/agent/k8s_psat/demo-cluster/"${node_uid}" \
     -selector k8s:pod-label:app:spire-server \
     -selector unix:uid:0 \
     -admin
+  # sleep 1
 
   container_id_cluster1=$(docker container ls | grep cluster1 | cut -d" " -f 1)
   container_id_cluster2=$(docker container ls | grep cluster2 | cut -d" " -f 1)
@@ -76,13 +69,15 @@ main() {
   pause_echo "# Deploy cilium, CRD, spire-agent, registrar to cluster1"
   kubectx cluster1
   kubectl apply -f spiffeid.spiffe.io_spiffeids.yaml
+  sleep 1
   kubectl apply -f spire-agent.yaml
+  # sleep 1
   kubectl apply -f registrar.yaml
   while [[ $(kubectl -n spire get pods spire-server-0 -o 'jsonpath={..status.conditions[?(@.type=="Ready")].status}') != "True" ]]; do echo "waiting for pod" && sleep 4 && kubectl get pods -A; done
+  # sleep 1
 
   pause_echo "# Deploy nginx workload to cluster1"
-  kubectl apply -f https://raw.githubusercontent.com/kubernetes/website/master/content/en/examples/application/simple_deployment.yaml
-  kubectl patch deployment nginx-deployment -p '{"spec":{"template":{"metadata":{"labels":{"spiffe.io/spiffe-id": "true"}}}}}'
+  kubectl apply -f simple_deployment.yaml
 
   exit 0
 }

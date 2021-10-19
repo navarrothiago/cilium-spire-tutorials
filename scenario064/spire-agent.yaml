@@ -54,11 +54,10 @@ data:
       data_dir = "/run/spire"
       log_level = "DEBUG"
       server_address = "192.168.58.2"
-      server_port = "32745"
+      server_port = "32576"
       socket_path = "/run/spire/sockets/agent.sock"
       trust_domain = "example.org"
       insecure_bootstrap = true
-      join_token = "9b4fdaef-28ba-467f-be41-ad5e8d199bfe"
       admin_socket_path = "/run/spire/sockets-admin/admin.sock"
       authorized_users_delegation_api = [
           "spiffe://example.org/ciliumagent",
@@ -66,8 +65,9 @@ data:
     }
 
     plugins {
-      NodeAttestor "join_token" {
+      NodeAttestor "k8s_psat" {
         plugin_data {
+          cluster = "demo-cluster"
         }
       }
 

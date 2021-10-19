@@ -54,11 +54,11 @@ data:
       data_dir = "/run/spire"
       log_level = "DEBUG"
       server_address = "192.168.58.2"
-      server_port = "32625"
+      server_port = "32195"
       socket_path = "/run/spire/sockets/agent.sock"
       trust_domain = "example.org"
       insecure_bootstrap = true
-      join_token = "d36b4276-54f5-4c18-aa9a-e0eca66b5d8c"
+      join_token = "f20a534e-e1b2-4727-ac05-93a2162c1628"
       admin_socket_path = "/run/spire/sockets-admin/admin.sock"
       authorized_users_delegation_api = [
           "spiffe://example.org/ciliumagent",
