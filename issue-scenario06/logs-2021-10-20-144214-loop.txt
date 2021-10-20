@@ -1,0 +1,254 @@
+======= 1 times ========
+Found 3 entries
+Entry ID         : 590c00f3-a2f7-44d9-8f8a-e8b7461fb0fd
+SPIFFE ID        : spiffe://example.org/k8s-workload-registrar/demo-cluster/node/cluster1
+Parent ID        : spiffe://example.org/spire/server
+Revision         : 0
+TTL              : default
+Selector         : k8s_psat:agent_node_uid:8d948aaa-7462-4e26-874f-b935eda806df
+Selector         : k8s_psat:cluster:demo-cluster
+
+Entry ID         : db680e2a-52c7-4d98-af1c-359bd9c367f0
+SPIFFE ID        : spiffe://example.org/ns/default/sa/default
+Parent ID        : spiffe://example.org/k8s-workload-registrar/demo-cluster/node/cluster1
+Revision         : 0
+TTL              : default
+Selector         : k8s:node-name:cluster1
+Selector         : k8s:ns:default
+Selector         : k8s:pod-uid:790f10ea-8b08-416d-829c-a5495960851b
+DNS name         : nginx-deployment-7ffbd8bd54-bgh76
+
+Entry ID         : f21bc00c-cf3d-4190-a967-af3f366bd53d
+SPIFFE ID        : spiffe://example.org/registrar
+Parent ID        : spiffe://example.org/spire/agent/k8s_psat/demo-cluster/8d948aaa-7462-4e26-874f-b935eda806df
+Revision         : 0
+TTL              : default
+Selector         : k8s:pod-label:app:spire-server
+Selector         : unix:uid:0
+Admin            : true
+
+======= 2 times ========
+Found 3 entries
+Entry ID         : a94ba743-789a-4f3c-a5bf-de1c9328771a
+SPIFFE ID        : spiffe://example.org/k8s-workload-registrar/demo-cluster/node/cluster1
+Parent ID        : spiffe://example.org/spire/server
+Revision         : 0
+TTL              : default
+Selector         : k8s_psat:agent_node_uid:8d948aaa-7462-4e26-874f-b935eda806df
+Selector         : k8s_psat:cluster:demo-cluster
+
+Entry ID         : d0eb5dac-259e-4088-adf5-d5688168ff45
+SPIFFE ID        : spiffe://example.org/ns/default/sa/default
+Parent ID        : spiffe://example.org/k8s-workload-registrar/demo-cluster/node/cluster1
+Revision         : 0
+TTL              : default
+Selector         : k8s:node-name:cluster1
+Selector         : k8s:ns:default
+Selector         : k8s:pod-uid:ec08453a-8d90-4879-8a63-fd724b5f4a2a
+DNS name         : nginx-deployment-7ffbd8bd54-42gct
+
+Entry ID         : d8ea81fc-0dc2-4c8c-b0f2-004b7826367f
+SPIFFE ID        : spiffe://example.org/registrar
+Parent ID        : spiffe://example.org/spire/agent/k8s_psat/demo-cluster/8d948aaa-7462-4e26-874f-b935eda806df
+Revision         : 0
+TTL              : default
+Selector         : k8s:pod-label:app:spire-server
+Selector         : unix:uid:0
+Admin            : true
+
+======= 3 times ========
+Found 3 entries
+Entry ID         : 39dacf2b-29ad-40c8-903a-3c0f8e5771f3
+SPIFFE ID        : spiffe://example.org/k8s-workload-registrar/demo-cluster/node/cluster1
+Parent ID        : spiffe://example.org/spire/server
+Revision         : 0
+TTL              : default
+Selector         : k8s_psat:agent_node_uid:8d948aaa-7462-4e26-874f-b935eda806df
+Selector         : k8s_psat:cluster:demo-cluster
+
+Entry ID         : 67492388-cd93-40d6-ae46-a02a35a6bfb0
+SPIFFE ID        : spiffe://example.org/ns/default/sa/default
+Parent ID        : spiffe://example.org/k8s-workload-registrar/demo-cluster/node/cluster1
+Revision         : 0
+TTL              : default
+Selector         : k8s:node-name:cluster1
+Selector         : k8s:ns:default
+Selector         : k8s:pod-uid:6665d3b1-3ea1-4c15-aba9-93ec5a9f4185
+DNS name         : nginx-deployment-7ffbd8bd54-xcnkr
+
+Entry ID         : 3887a12d-1bc3-41f4-8057-965bbd8457ac
+SPIFFE ID        : spiffe://example.org/registrar
+Parent ID        : spiffe://example.org/spire/agent/k8s_psat/demo-cluster/8d948aaa-7462-4e26-874f-b935eda806df
+Revision         : 0
+TTL              : default
+Selector         : k8s:pod-label:app:spire-server
+Selector         : unix:uid:0
+Admin            : true
+
+======= 4 times ========
+Found 1 entry
+Entry ID         : 3ea818cf-33e6-4054-94f4-c35912860fc8
+SPIFFE ID        : spiffe://example.org/registrar
+Parent ID        : spiffe://example.org/spire/agent/k8s_psat/demo-cluster/8d948aaa-7462-4e26-874f-b935eda806df
+Revision         : 0
+TTL              : default
+Selector         : k8s:pod-label:app:spire-server
+Selector         : unix:uid:0
+Admin            : true
+
+======= 5 times ========
+Found 1 entry
+Entry ID         : 19671bb8-114a-4ced-a98a-01d4ed04bee4
+SPIFFE ID        : spiffe://example.org/registrar
+Parent ID        : spiffe://example.org/spire/agent/k8s_psat/demo-cluster/8d948aaa-7462-4e26-874f-b935eda806df
+Revision         : 0
+TTL              : default
+Selector         : k8s:pod-label:app:spire-server
+Selector         : unix:uid:0
+Admin            : true
+
+======= 6 times ========
+Found 3 entries
+Entry ID         : a5a52d8a-8df7-422b-bbfc-ba9633469559
+SPIFFE ID        : spiffe://example.org/k8s-workload-registrar/demo-cluster/node/cluster1
+Parent ID        : spiffe://example.org/spire/server
+Revision         : 0
+TTL              : default
+Selector         : k8s_psat:agent_node_uid:8d948aaa-7462-4e26-874f-b935eda806df
+Selector         : k8s_psat:cluster:demo-cluster
+
+Entry ID         : eac8d978-f2ac-4d13-924d-1c42312a8df5
+SPIFFE ID        : spiffe://example.org/ns/default/sa/default
+Parent ID        : spiffe://example.org/k8s-workload-registrar/demo-cluster/node/cluster1
+Revision         : 0
+TTL              : default
+Selector         : k8s:node-name:cluster1
+Selector         : k8s:ns:default
+Selector         : k8s:pod-uid:b7a31006-f3f5-4305-babd-667c11678781
+DNS name         : nginx-deployment-7ffbd8bd54-t4mz4
+
+Entry ID         : 3589c0ea-90a0-4516-95a1-bb2829f4a7af
+SPIFFE ID        : spiffe://example.org/registrar
+Parent ID        : spiffe://example.org/spire/agent/k8s_psat/demo-cluster/8d948aaa-7462-4e26-874f-b935eda806df
+Revision         : 0
+TTL              : default
+Selector         : k8s:pod-label:app:spire-server
+Selector         : unix:uid:0
+Admin            : true
+
+======= 7 times ========
+Found 3 entries
+Entry ID         : ddf80024-2f7e-42fd-a8e8-1a70188ff3d5
+SPIFFE ID        : spiffe://example.org/k8s-workload-registrar/demo-cluster/node/cluster1
+Parent ID        : spiffe://example.org/spire/server
+Revision         : 0
+TTL              : default
+Selector         : k8s_psat:agent_node_uid:8d948aaa-7462-4e26-874f-b935eda806df
+Selector         : k8s_psat:cluster:demo-cluster
+
+Entry ID         : 0c5c591b-db31-4f2f-b693-2495f1df2f1d
+SPIFFE ID        : spiffe://example.org/ns/default/sa/default
+Parent ID        : spiffe://example.org/k8s-workload-registrar/demo-cluster/node/cluster1
+Revision         : 0
+TTL              : default
+Selector         : k8s:node-name:cluster1
+Selector         : k8s:ns:default
+Selector         : k8s:pod-uid:dc986730-6eae-4007-a58b-b1e4b07a1d46
+DNS name         : nginx-deployment-7ffbd8bd54-8gljb
+
+Entry ID         : 073a41aa-cd34-4a2d-a464-69e9239f9e16
+SPIFFE ID        : spiffe://example.org/registrar
+Parent ID        : spiffe://example.org/spire/agent/k8s_psat/demo-cluster/8d948aaa-7462-4e26-874f-b935eda806df
+Revision         : 0
+TTL              : default
+Selector         : k8s:pod-label:app:spire-server
+Selector         : unix:uid:0
+Admin            : true
+
+======= 8 times ========
+Found 3 entries
+Entry ID         : 59a8558b-63d8-42e4-9288-932e5809449e
+SPIFFE ID        : spiffe://example.org/k8s-workload-registrar/demo-cluster/node/cluster1
+Parent ID        : spiffe://example.org/spire/server
+Revision         : 0
+TTL              : default
+Selector         : k8s_psat:agent_node_uid:8d948aaa-7462-4e26-874f-b935eda806df
+Selector         : k8s_psat:cluster:demo-cluster
+
+Entry ID         : de184b08-3582-42da-a671-52fc99564cb6
+SPIFFE ID        : spiffe://example.org/ns/default/sa/default
+Parent ID        : spiffe://example.org/k8s-workload-registrar/demo-cluster/node/cluster1
+Revision         : 0
+TTL              : default
+Selector         : k8s:node-name:cluster1
+Selector         : k8s:ns:default
+Selector         : k8s:pod-uid:a86e3bb1-5363-489c-b4f3-b2aff736d295
+DNS name         : nginx-deployment-7ffbd8bd54-lnvb5
+
+Entry ID         : 6eedd01c-3b59-4022-b0b9-5985b14be3ab
+SPIFFE ID        : spiffe://example.org/registrar
+Parent ID        : spiffe://example.org/spire/agent/k8s_psat/demo-cluster/8d948aaa-7462-4e26-874f-b935eda806df
+Revision         : 0
+TTL              : default
+Selector         : k8s:pod-label:app:spire-server
+Selector         : unix:uid:0
+Admin            : true
+
+======= 9 times ========
+Found 3 entries
+Entry ID         : 09cf95df-d0e0-4079-b48b-ef2ec6956d94
+SPIFFE ID        : spiffe://example.org/k8s-workload-registrar/demo-cluster/node/cluster1
+Parent ID        : spiffe://example.org/spire/server
+Revision         : 0
+TTL              : default
+Selector         : k8s_psat:agent_node_uid:8d948aaa-7462-4e26-874f-b935eda806df
+Selector         : k8s_psat:cluster:demo-cluster
+
+Entry ID         : 79842382-5806-48ba-b573-9a2b5c4477b2
+SPIFFE ID        : spiffe://example.org/ns/default/sa/default
+Parent ID        : spiffe://example.org/k8s-workload-registrar/demo-cluster/node/cluster1
+Revision         : 0
+TTL              : default
+Selector         : k8s:node-name:cluster1
+Selector         : k8s:ns:default
+Selector         : k8s:pod-uid:815b6736-e331-49da-9b80-325e89efde04
+DNS name         : nginx-deployment-7ffbd8bd54-9p7w4
+
+Entry ID         : 728029ec-dc84-4fc4-9cb8-5e13b70a6e04
+SPIFFE ID        : spiffe://example.org/registrar
+Parent ID        : spiffe://example.org/spire/agent/k8s_psat/demo-cluster/8d948aaa-7462-4e26-874f-b935eda806df
+Revision         : 0
+TTL              : default
+Selector         : k8s:pod-label:app:spire-server
+Selector         : unix:uid:0
+Admin            : true
+
+======= 10 times ========
+Found 3 entries
+Entry ID         : e0aaee34-2b2c-426d-94df-eef38c10eec2
+SPIFFE ID        : spiffe://example.org/k8s-workload-registrar/demo-cluster/node/cluster1
+Parent ID        : spiffe://example.org/spire/server
+Revision         : 0
+TTL              : default
+Selector         : k8s_psat:agent_node_uid:8d948aaa-7462-4e26-874f-b935eda806df
+Selector         : k8s_psat:cluster:demo-cluster
+
+Entry ID         : b4d667d4-ed44-4571-a245-dbbeb13cfc79
+SPIFFE ID        : spiffe://example.org/ns/default/sa/default
+Parent ID        : spiffe://example.org/k8s-workload-registrar/demo-cluster/node/cluster1
+Revision         : 0
+TTL              : default
+Selector         : k8s:node-name:cluster1
+Selector         : k8s:ns:default
+Selector         : k8s:pod-uid:5563a775-9b2b-4ca1-a90a-88894d577d7a
+DNS name         : nginx-deployment-7ffbd8bd54-bsq2x
+
+Entry ID         : feb25199-bc3d-4ee6-8997-4b5916ec7c38
+SPIFFE ID        : spiffe://example.org/registrar
+Parent ID        : spiffe://example.org/spire/agent/k8s_psat/demo-cluster/8d948aaa-7462-4e26-874f-b935eda806df
+Revision         : 0
+TTL              : default
+Selector         : k8s:pod-label:app:spire-server
+Selector         : unix:uid:0
+Admin            : true
+
