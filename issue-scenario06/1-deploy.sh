@@ -81,7 +81,7 @@ main() {
   # THE spiffe://example.org/k8s-workload-registrar/demo-cluster/node/cluster1 IS NOT CREATED.
   # Depending on the sleep is placed, the behaviour change. Try to remove it. 
   # I dont know if the sleep is necessary.
-  sleep 4
+  # sleep 4
   helm install cluster1 cluster1 \
     --set spireServerAddress="${desired_server_ip}" \
     --set spireServerPort="${desired_server_port}"
