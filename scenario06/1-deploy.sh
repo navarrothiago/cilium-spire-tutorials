@@ -10,43 +10,35 @@
 # Deploy CRD, spire-agent, registrar cluster1
 # Deploy nginx
 
-function pause_echo {
-
-echo $@
-# sleep 3
-
-}
-
 main() {
 
   local -r dirname="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
   local -r filename="${dirname}/$(basename "${BASH_SOURCE[0]}")"
+  local -r user="kubeconfig-sa"
   
   "${dirname}"/2-cleanup.sh 2> /dev/null
-  
-  pause_echo "# Deploy spire-server and cilium to cluster2"
 
-  kubectx cluster2
-  kubectl apply -f spire-server.yaml
+  kubectl config use-context cluster1
+
+  ca_data=$(kubectl config view -o json --flatten | jq --raw-output '.clusters[] | select (.name == "cluster1") | .cluster."certificate-authority-data"')
+  cluster_address=$(kubectl config view -o json | jq --raw-output '.clusters[] | select (.name == "cluster1") | .cluster."server"')
+  echo "Obtain the name of the service account authentication token and assign its value to an environment variable"
+  token_name=`kubectl -n kube-system get serviceaccount/"${user}" -o jsonpath='{.secrets[0].name}'`
+  echo "Obtain the value of the service account authentication token and assign its value (decoded from base64) to an environment variable"
+  token=`kubectl -n kube-system get secret "${token_name}" -o jsonpath='{.data.token}'| base64 --decode`
+
+  kubectl config use-context cluster2
+  echo "# Deploy spire-server cluster2"
+  helm install cluster2 cluster2 \
+    --set certificateAuthorityData="${ca_data}" \
+    --set clusterAddress="${cluster_address}" \
+    --set user="${user}" \
+    --set token="${token}"
+
   kubectl get pods -A
   while [[ $(kubectl -n spire get pods spire-server-0 -o 'jsonpath={..status.conditions[?(@.type=="Ready")].status}') != "True" ]]; do echo "waiting for pod" && sleep 4 && kubectl get pods -A; done
 
-  pause_echo "# Change spire-agent server_address and server_port based on the spire-server-0"
-  current_server_ip=$(grep "server_address = " spire-agent.yaml  | awk -F\" '{print $2}')
-  desired_server_ip=$(minikube service --url spire-server -p cluster2 -n spire --https | cut -d':' -f 2 | cut -b 3-)
-  sed -i 's@'"${current_server_ip}"'@'"${desired_server_ip}"'@' spire-agent.yaml 
-  current_server_port=$(grep "server_port = " spire-agent.yaml  | awk -F\" '{print $2}')
-  desired_server_port=$(minikube service --url spire-server -p cluster2 -n spire --https | cut -d':' -f 3)
-  sed -i 's@'"${current_server_port}"'@'"${desired_server_port}"'@' spire-agent.yaml 
-
-  pause_echo "# Change registrar server_address based on the spire-server-0"
-  current_full_server_address=$(grep "server_address = " registrar.yaml  | awk -F\" '{print $2}')
-  desired_full_server_address="${desired_server_ip}":"${desired_server_port}"
-  sed -i 's@'"${current_full_server_address}"'@'"${desired_full_server_address}"'@' registrar.yaml
-  echo $current_full_server_address
-  echo $desired_full_server_address
-
-  # pause_echo "# Add privileged registration entry for the registrar"
+  # echo "# Add privileged registration entry for the registrar"
   # Registrar connects via unix socket to fetch the SVIDs through spire-agent
   # Registrar uses the SVIDs to establish a secure connection to spire-server
   node_uid=$(kubectl get nodes -o json --context cluster1 | jq .items[0].metadata.uid | awk -F\" '{print $2}')
@@ -64,27 +56,35 @@ main() {
     -parentID spiffe://example.org/spire/agent/k8s_psat/demo-cluster/"${node_uid}" \
     -selector unix:uid:0 
 
+  # Must be before the configuration of the docker network to avoid the error
+  # Error getting ip from host: container addresses should have 2 values, got 3
+  echo "# Change spire-agent server_address and server_port based on the spire-server-0"
+  desired_server_ip=$(minikube service --url spire-server -p cluster2 -n spire --https | cut -d':' -f 2 | cut -b 3-)
+  desired_server_port=$(minikube service --url spire-server -p cluster2 -n spire --https | cut -d':' -f 3)
+
   container_id_cluster1=$(docker container ls | grep cluster1 | cut -d" " -f 1)
   container_id_cluster2=$(docker container ls | grep cluster2 | cut -d" " -f 1)
 
-  # FIXME navarrothiago: THERE IS AN INTERMITTENT PROBLEM IF WE NOT WAIT. 
-  # THE spiffe://example.org/k8s-workload-registrar/demo-cluster/node/cluster1 IS NOT CREATED.
-  # Depending on the sleep is placed, the behaviour change. Try to remove it. 
-  # I dont know if the sleep is necessary.
 
   # Connect bridges
   docker network connect cluster2 "${container_id_cluster1}"
   docker network connect cluster1 "${container_id_cluster2}"
   
-  pause_echo "# Deploy cilium, CRD, spire-agent, registrar to cluster1"
-  kubectx cluster1
-  kubectl apply -f "${dirname}/../"cilium.yaml
+  echo "# Deploy cilium, CRD, spire-agent, registrar to cluster1"
+  kubectl config use-context cluster1
+  kubectl apply -f "${dirname}"/../cilium.yaml
   kubectl apply -f spiffeid.spiffe.io_spiffeids.yaml
-  kubectl apply -f spire-agent.yaml
-  kubectl apply -f registrar.yaml
+  # FIXME navarrothiago: THERE IS AN INTERMITTENT PROBLEM IF WE NOT WAIT. 
+  # THE spiffe://example.org/k8s-workload-registrar/demo-cluster/node/cluster1 IS NOT CREATED.
+  # Depending on the sleep is placed, the behaviour change. Try to remove it. 
+  # I dont know if the sleep is necessary.
+  sleep 4
+  helm install cluster1 cluster1 \
+    --set spireServerAddress="${desired_server_ip}" \
+    --set spireServerPort="${desired_server_port}"
   while [[ $(kubectl -n spire get pods spire-server-0 -o 'jsonpath={..status.conditions[?(@.type=="Ready")].status}') != "True" ]]; do echo "waiting for pod" && sleep 4 && kubectl get pods -A; done
 
-  # pause_echo "# Deploy nginx workload to cluster1"
+  # echo "# Deploy nginx workload to cluster1"
   kubectl apply -f simple_deployment.yaml
 
   exit 0

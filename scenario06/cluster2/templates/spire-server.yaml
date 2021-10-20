@@ -90,8 +90,11 @@ data:
       NodeAttestor "k8s_psat" {
         plugin_data {
           clusters = {
+            # The name must match with registrar configuration.
             "demo-cluster" = {
               service_account_allow_list = ["spire:spire-agent"]
+              kube_config_file = "/tmp/kube/kube.conf"
+              # use_token_review_api_validation = true
             }
           }
         }
@@ -105,29 +108,12 @@ data:
 
       Notifier "k8sbundle" {
         plugin_data {
-          webhook_label = "spiffe.io/webhook"
+          # webhook_label = "spiffe.io/webhook"
         }
       }
     }
 
----
-
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: k8s-workload-registrar-role
-rules:
-- apiGroups: [""]
-  resources: ["endpoints", "nodes", "pods"]
-  verbs: ["get", "list", "watch"]
-- apiGroups: ["spiffeid.spiffe.io"]
-  resources: ["spiffeids"]
-  verbs: ["create", "delete", "get", "list", "patch", "update", "watch"]
-- apiGroups: ["spiffeid.spiffe.io"]
-  resources: ["spiffeids/status"]
-  verbs: ["get", "patch", "update"]
-
----
+--- 
 
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -144,47 +130,6 @@ subjects:
 
 ---
 
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: k8s-workload-registrar
-  namespace: spire
-data:
-  k8s-workload-registrar.conf: |
-    log_level = "debug"
-    trust_domain = "example.org"
-    server_socket_path = "/tmp/spire-server/private/api.sock"
-    cluster = "demo-cluster"
-    pod_controller = true
-    add_svc_dns_names = true
-    mode = "crd"
-    webhook_enabled = true
-    identity_template = "ns/{{.Pod.Namespace}}/pod/{{.Pod.Name}}"
-    identity_template_label = "spiffe.io/spiffe-id"
-
----
-
-apiVersion: admissionregistration.k8s.io/v1beta1
-kind: ValidatingWebhookConfiguration
-metadata:
-  name: k8s-workload-registrar
-  labels:
-    spiffe.io/webhook: "true"
-webhooks:
-- name: k8s-workload-registrar.spire.svc
-  clientConfig:
-    service:
-      name: k8s-workload-registrar
-      namespace: spire
-      path: "/validate-spiffeid-spiffe-io-v1beta1-spiffeid"
-  rules:
-  - apiGroups: ["spiffeid.spiffe.io"]
-    apiVersions: ["v1beta1"]
-    operations: ["CREATE", "UPDATE", "DELETE"]
-    resources: ["spiffeids"]
-    scope: Namespaced
-
----
 
 apiVersion: apps/v1
 kind: StatefulSet
@@ -237,29 +182,8 @@ spec:
             - name: spire-registration-socket
               mountPath: /tmp
               readOnly: false
-        - name: k8s-workload-registrar
-          image: gcr.io/spiffe-io/k8s-workload-registrar:1.0.2
-          args:
-            - -config
-            - /run/spire/config/k8s-workload-registrar.conf
-          env:
-            - name: MY_POD_NAMESPACE
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.namespace
-          ports:
-            - containerPort: 9443
-              name: webhook
-              protocol: TCP
-          volumeMounts:
-            - mountPath: /run/spire/config
-              name: k8s-workload-registrar-config
-              readOnly: true
-            - mountPath: /run/spire/sockets
-              name: spire-agent-socket
-              readOnly: true
-            - name: spire-registration-socket
-              mountPath: /tmp
+            - name: kube-config
+              mountPath: /tmp/kube
               readOnly: false
       volumes:
         - name: spire-config
@@ -272,6 +196,9 @@ spec:
         - name: k8s-workload-registrar-config
           configMap:
             name: k8s-workload-registrar
+        - name: kube-config
+          configMap:
+            name: kube-config-map
         - name: spire-registration-socket
           emptyDir: {}
   volumeClaimTemplates:
@@ -301,18 +228,43 @@ spec:
   selector:
     app: spire-server
 
----
+--- 
 
 apiVersion: v1
-kind: Service
+kind: ConfigMap
 metadata:
-  name: k8s-workload-registrar
+  name: kube-config-map
   namespace: spire
-spec:
-  ports:
-  - name: webhook
-    protocol: TCP
-    port: 443
-    targetPort: 9443
-  selector:
-    app: spire-server
+data:
+  kube.conf: |
+    apiVersion: v1
+    clusters:
+    - cluster:
+        certificate-authority-data: {{ .Values.certificateAuthorityData }}
+        extensions:
+        - extension:
+            last-update: Wed, 13 Oct 2021 14:25:08 -03
+            provider: minikube.sigs.k8s.io
+            version: v1.21.0
+          name: cluster_info
+        server: {{ .Values.clusterAddress }}
+      name: cluster1
+    contexts:
+    - context:
+        cluster: cluster1
+        extensions:
+        - extension:
+            last-update: Wed, 13 Oct 2021 14:25:08 -03
+            provider: minikube.sigs.k8s.io
+            version: v1.21.0
+          name: context_info
+        namespace: default
+        user: {{ .Values.user }} 
+      name: cluster1
+    current-context: cluster1
+    kind: Config
+    preferences: {}
+    users:
+    - name: {{ .Values.user }} 
+      user:
+        token: {{ .Values.token }}
